@@ -9,16 +9,22 @@ const main = async () => {
 
   let hiFiveCount;
   hiFiveCount = await hiFiveContract.getTotalHiFives();
+  console.log(hiFiveCount.toNumber());
 
-  let hiFiveTxn = await hiFiveContract.hiFive();
+  let hiFiveTxn = await hiFiveContract.hiFive('Some Message!');
   await hiFiveTxn.wait();
 
   hiFiveCount = await hiFiveContract.getTotalHiFives();
+  console.log(hiFiveCount.toNumber());
 
-  hiFiveTxn = await hiFiveContract.connect(randomPerson).hiFive();
+  hiFiveTxn = await hiFiveContract.connect(randomPerson).hiFive('Another person messaged');
   await hiFiveTxn.wait();
 
   hiFiveCount = await hiFiveContract.getTotalHiFives();
+  console.log(hiFiveCount.toNumber());
+
+  let allHighFives = await hiFiveContract.getAllHiFives();
+  console.log(allHighFives)
 };
 
 const runMain = async () => {
