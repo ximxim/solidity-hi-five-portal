@@ -26,8 +26,8 @@ contract HiFivePortal {
 
     function hiFive(string memory _message) public {
         require(
-            lastHiFivedAt[msg.sender] + 15 minutes < block.timestamp,
-            "Wait 15m"
+            lastHiFivedAt[msg.sender] + 30 seconds < block.timestamp,
+            "Wait 30 seconds"
         );
 
         lastHiFivedAt[msg.sender] = block.timestamp;

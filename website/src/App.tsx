@@ -86,7 +86,9 @@ export default function App() {
         let count = await hiFivePortalContract.getTotalHiFives();
         console.log("Retrieved total HiFives count...", count.toNumber());
 
-        const waveTxn = await hiFivePortalContract.hiFive(message);
+        const waveTxn = await hiFivePortalContract.hiFive(message, {
+          gasLimit: 300000,
+        });
         console.log("Mining...", waveTxn.hash);
 
         await waveTxn.wait();
@@ -95,8 +97,6 @@ export default function App() {
         count = await hiFivePortalContract.getTotalHiFives();
         setTotalHiFives(count.toNumber());
         console.log("Retrieved total wave count...", count.toNumber());
-
-        getAllHiFives();
       } else {
         console.log("Ethereum object doesn't exist!");
       }
@@ -104,7 +104,7 @@ export default function App() {
       console.log(error);
     } finally {
       setIsLoading(false);
-      setMessage('');
+      setMessage("");
     }
   };
 
@@ -144,6 +144,22 @@ export default function App() {
 
         const res = await hiFivePortalContract.getAllHiFives();
         setHiFives(res);
+
+        hiFivePortalContract.on(
+          "NewHiFive",
+          (hiFiver: string, timestamp: number, message: string) => {
+            console.log("NewHiFive", hiFiver, timestamp, message);
+
+            setHiFives((prevState) => [
+              ...prevState,
+              {
+                hiFiver,
+                timestamp,
+                message,
+              },
+            ]);
+          }
+        );
       }
     } catch (ex) {
       console.log(ex);
@@ -177,6 +193,7 @@ export default function App() {
 
         <form onSubmit={hiFive}>
           <textarea
+            value={message}
             name="message"
             className="textarea"
             onChange={(e) => setMessage(e.target.value)}
