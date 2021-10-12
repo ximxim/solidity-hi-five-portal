@@ -3,7 +3,7 @@ import { ethers } from "ethers";
 import "./App.css";
 import abi from "./utils/HiFivePortal.json";
 
-const contractAddress = "0x6a7318eB52e06F3F8933136D57eed62356fB1a4a";
+const contractAddress = "0x0E692934E1567a787379790c5dDa790a4dA1133b";
 const contractABI = abi.abi;
 
 interface HiFive {
