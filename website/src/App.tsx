@@ -3,13 +3,21 @@ import { ethers } from "ethers";
 import "./App.css";
 import abi from "./utils/HiFivePortal.json";
 
-const contractAddress = "0x8cC43204976FbC4F7E7A592F72a1c46594f07939";
+const contractAddress = "0x3478d5b12eB09b428f5cffa72a52Ee9252e1122b";
 const contractABI = abi.abi;
 
+interface HiFive {
+  hiFiver: string;
+  message: string;
+  timestamp: number;
+}
+
 export default function App() {
+  const [message, setMessage] = useState<string>();
   const [currentAccount, setCurrentAccount] = useState<string>("");
   const [totalHiFives, setTotalHiFives] = useState<number>(0);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [hiFives, setHiFives] = useState<HiFive[]>([]);
 
   const checkIfWalletIsConnected = async () => {
     try {
@@ -56,7 +64,11 @@ export default function App() {
     }
   };
 
-  const hiFive = async () => {
+  const hiFive = async (event: any) => {
+    event.preventDefault();
+
+    if (!message) return;
+
     setIsLoading(true);
 
     try {
@@ -74,7 +86,7 @@ export default function App() {
         let count = await hiFivePortalContract.getTotalHiFives();
         console.log("Retrieved total HiFives count...", count.toNumber());
 
-        const waveTxn = await hiFivePortalContract.hiFive();
+        const waveTxn = await hiFivePortalContract.hiFive(message);
         console.log("Mining...", waveTxn.hash);
 
         await waveTxn.wait();
@@ -83,6 +95,8 @@ export default function App() {
         count = await hiFivePortalContract.getTotalHiFives();
         setTotalHiFives(count.toNumber());
         console.log("Retrieved total wave count...", count.toNumber());
+
+        getAllHiFives();
       } else {
         console.log("Ethereum object doesn't exist!");
       }
@@ -90,13 +104,14 @@ export default function App() {
       console.log(error);
     } finally {
       setIsLoading(false);
+      setMessage('');
     }
   };
 
-  const getTotalHighFives = async () => {
+  const getTotalHiFives = async () => {
     try {
       const { ethereum } = window as any;
-      
+
       if (ethereum) {
         const provider = new ethers.providers.Web3Provider(ethereum);
         const signer = provider.getSigner();
@@ -105,9 +120,30 @@ export default function App() {
           contractABI,
           signer
         );
-    
+
         let count = await hiFivePortalContract.getTotalHiFives();
         setTotalHiFives(count.toNumber());
+      }
+    } catch (ex) {
+      console.log(ex);
+    }
+  };
+
+  const getAllHiFives = async () => {
+    try {
+      const { ethereum } = window as any;
+
+      if (ethereum) {
+        const provider = new ethers.providers.Web3Provider(ethereum);
+        const signer = provider.getSigner();
+        const hiFivePortalContract = new ethers.Contract(
+          contractAddress,
+          contractABI,
+          signer
+        );
+
+        const res = await hiFivePortalContract.getAllHiFives();
+        setHiFives(res);
       }
     } catch (ex) {
       console.log(ex);
@@ -121,27 +157,58 @@ export default function App() {
   useEffect(() => {
     if (!currentAccount) return;
 
-    getTotalHighFives();
+    getAllHiFives();
+    getTotalHiFives();
   }, [currentAccount]);
 
   return (
     <div className="mainContainer">
       <div className="dataContainer">
-        <div className="header">{totalHiFives === 0 ? '👋 Hey there!' : `I have received ${totalHiFives} high fives, thanks all`}</div>
+        <div className="header">
+          {totalHiFives === 0
+            ? "👋 Hey there!"
+            : `I have received ${totalHiFives} high fives, thanks all`}
+        </div>
 
         <div className="bio">
           I am Azim and I worked on react native mobile apps so that's pretty
           cool right? Connect your Ethereum wallet and send a HiFive to me!
         </div>
 
-        <button className="hiFiveButton" onClick={hiFive}>
-          {isLoading ? 'Sending...' : 'Send me a HiFive'}
-        </button>
+        <form onSubmit={hiFive}>
+          <textarea
+            name="message"
+            className="textarea"
+            onChange={(e) => setMessage(e.target.value)}
+            placeholder="Type some message to send"
+            required
+          />
+          <button className="hiFiveButton" type="submit">
+            {isLoading ? "Sending..." : "Send me a HiFive"}
+          </button>
+        </form>
         {!currentAccount && (
           <button className="hiFiveButton" onClick={connectWallet}>
             Connect Wallet
           </button>
         )}
+
+        {hiFives.map((item, index) => {
+          return (
+            <div
+              key={index}
+              style={{
+                backgroundColor: "OldLace",
+                marginTop: "16px",
+                padding: "8px",
+              }}
+            >
+              <div>Address: {item.hiFiver}</div>
+              <div>Time: {new Date(item.timestamp * 1000).toString()}</div>
+              <div>Message: {item.message}</div>
+            </div>
+          );
+        })}
       </div>
     </div>
   );
