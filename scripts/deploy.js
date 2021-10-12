@@ -7,12 +7,18 @@ const main = async () => {
 
   const Token = await hre.ethers.getContractFactory('HiFivePortal');
   const portal = await Token.deploy({
-    value: hre.ethers.utils.parseEther('0.001'),
+    value: hre.ethers.utils.parseEther('0.0002'),
   });
 
   await portal.deployed();
 
   console.log('HiFive address: ', portal.address);
+
+  let contractBalance = await hre.ethers.provider.getBalance(portal.address);
+  console.log(
+    'Contract balance:',
+    hre.ethers.utils.formatEther(contractBalance)
+  );
 };
 
 const runMain = async () => {
