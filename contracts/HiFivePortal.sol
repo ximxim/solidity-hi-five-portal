@@ -18,11 +18,20 @@ contract HiFivePortal {
 
     HiFive[] hiFives;
 
+    mapping(address => uint256) public lastHiFivedAt;
+
     constructor() payable {
         console.log("Yo yo, I am a contract and I am smart");
     }
 
     function hiFive(string memory _message) public {
+        require(
+            lastHiFivedAt[msg.sender] + 15 minutes < block.timestamp,
+            "Wait 15m"
+        );
+
+        lastHiFivedAt[msg.sender] = block.timestamp;
+
         totalHiFives += 1;
         console.log("%s sent a hi5!", msg.sender);
 

@@ -22,6 +22,9 @@ const main = async () => {
   let hiFiveTxn = await hiFiveContract.hiFive('Some Message!');
   await hiFiveTxn.wait();
 
+  hiFiveTxn = await hiFiveContract.hiFive('Spam message');
+  await hiFiveTxn.wait();
+
   contractBalance = await hre.ethers.provider.getBalance(hiFiveContract.address);
   console.log('Contract balance', hre.ethers.utils.formatEther(contractBalance));
 
