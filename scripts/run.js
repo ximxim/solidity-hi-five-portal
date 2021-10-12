@@ -1,8 +1,16 @@
 const main = async () => {
   const [owner, randomPerson] = await hre.ethers.getSigners();
   const hiFiveContractFactory = await hre.ethers.getContractFactory('HiFivePortal');
-  const hiFiveContract = await hiFiveContractFactory.deploy();
+  const hiFiveContract = await hiFiveContractFactory.deploy({
+    value: hre.ethers.utils.parseEther('0.1'),
+  });
   await hiFiveContract.deployed();
+
+  let contractBalance = await hre.ethers.provider.getBalance(hiFiveContract.address);
+  console.log(
+    'Contract balance:',
+    hre.ethers.utils.formatEther(contractBalance)
+  );
 
   console.log("Contract deployed to:", hiFiveContract.address);
   console.log("Contract deployed by:", owner.address);
@@ -13,6 +21,9 @@ const main = async () => {
 
   let hiFiveTxn = await hiFiveContract.hiFive('Some Message!');
   await hiFiveTxn.wait();
+
+  contractBalance = await hre.ethers.provider.getBalance(hiFiveContract.address);
+  console.log('Contract balance', hre.ethers.utils.formatEther(contractBalance));
 
   hiFiveCount = await hiFiveContract.getTotalHiFives();
   console.log(hiFiveCount.toNumber());
